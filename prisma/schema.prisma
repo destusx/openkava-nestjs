@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum Role {
+    USER
+    ADMIN
+}
+
+enum Language {
+    UK
+    RU
+}
+
+model User {
+    id        Int       @id @default(autoincrement())
+    email     String    @unique
+    password  String
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    role      Role      @default(USER)
+    posts     Post[]    @relation("authorPosts")
+    projects  Project[] @relation("authorProjects")
+
+    @@map("users")
+}
+
+model Post {
+    id         Int        @id @default(autoincrement())
+    title      String     @unique
+    content    String
+    language   Language   @default(UK)
+    slug       String     @unique
+    image      String     @default("")
+    createdAt  DateTime   @default(now())
+    updatedAt  DateTime   @updatedAt
+    published  Boolean?   @default(false)
+    author     User       @relation("authorPosts", fields: [authorId], references: [id])
+    authorId   Int
+    categories Category[] @relation("categoryPosts")
+    viewsCount Int        @default(0)
+
+    @@map("posts")
+}
+
+model Project {
+    id         Int      @id @default(autoincrement())
+    title      String   @unique
+    content    String
+    language   Language @default(UK)
+    slug       String   @unique
+    image      String   @default("")
+    budget     Int
+    address    String
+    openedData DateTime
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    published  Boolean? @default(false)
+    author     User     @relation("authorProjects", fields: [authorId], references: [id])
+    authorId   Int
+
+    @@map("projects")
+}
+
+model Category {
+    id          Int      @id @default(autoincrement())
+    name        String
+    slug        String
+    title       String
+    description String?
+    language    Language @default(UK)
+    posts       Post[]   @relation("categoryPosts")
+
+    @@map("categories")
+}
+
+model Menu {
+    id          Int      @id @default(autoincrement())
+    name        String
+    slug        String
+    title       String
+    language    Language @default(UK)
+    description String?
+
+    @@map("menu")
+}
+
+model Image {
+    id        Int      @id @default(autoincrement())
+    filename  String
+    ruAlt     String
+    ukAlt     String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("images")
+}
