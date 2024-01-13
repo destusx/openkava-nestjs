@@ -162,6 +162,26 @@ export class PostService {
         return updatedPost;
     }
 
+    async deletePost(slug: string, userId: number) {
+        const post = await this.prisma.post.findFirst({ where: { slug } });
+
+        if (!post) {
+            throw new HttpException(
+                'Такого поста нет',
+                HttpStatus.UNPROCESSABLE_ENTITY,
+            );
+        }
+
+        if (post.authorId !== userId) {
+            throw new HttpException(
+                'Вы не можете удалить этот пост, нет прав',
+                HttpStatus.UNPROCESSABLE_ENTITY,
+            );
+        }
+
+        return await this.prisma.post.delete({ where: { slug } });
+    }
+
     private getSlug(title: string): string {
         return slugify(title, {
             replacement: '-',

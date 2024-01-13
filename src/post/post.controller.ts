@@ -1,6 +1,7 @@
 import {
     Body,
     Controller,
+    Delete,
     Get,
     Param,
     Post,
@@ -58,5 +59,12 @@ export class PostController {
         @User('id') userId: number,
     ) {
         return await this.postService.updatePost(slug, updatePostDto, userId);
+    }
+
+    @HasRoles(Role.ADMIN)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Delete(':slug')
+    async deletePost(@Param('slug') slug: string, @User('id') userId: number) {
+        return await this.postService.deletePost(slug, userId);
     }
 }
