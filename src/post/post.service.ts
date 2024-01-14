@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreatePostDto } from './dto/createPost.dto';
-import slugify from 'slugify';
 import { Language, Post } from '@prisma/client';
 import { UpdatePostDto } from './dto/updatePost.dto';
 
@@ -97,9 +96,17 @@ export class PostService {
     }
 
     async createPost(createPostDto: CreatePostDto, userId: number) {
-        const { title, content, image, categories, language } = createPostDto;
-
-        const slug = this.getSlug(title);
+        const {
+            title,
+            seoTitle,
+            description,
+            seoDescription,
+            content,
+            slug,
+            image,
+            categories,
+            language,
+        } = createPostDto;
 
         const existPost = await this.prisma.post.findFirst({
             where: { title: title },
@@ -117,6 +124,9 @@ export class PostService {
         const post = await this.prisma.post.create({
             data: {
                 title,
+                seoTitle,
+                description,
+                seoDescription,
                 content,
                 slug,
                 language,
@@ -180,14 +190,5 @@ export class PostService {
         }
 
         return await this.prisma.post.delete({ where: { slug } });
-    }
-
-    private getSlug(title: string): string {
-        return slugify(title, {
-            replacement: '-',
-            lower: true,
-            trim: true,
-            strict: true,
-        });
     }
 }

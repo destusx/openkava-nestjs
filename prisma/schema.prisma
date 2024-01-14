@@ -34,19 +34,22 @@ model User {
 }
 
 model Post {
-    id         Int        @id @default(autoincrement())
-    title      String     @unique
-    content    String
-    language   Language   @default(UK)
-    slug       String     @unique
-    image      String     @default("")
-    createdAt  DateTime   @default(now())
-    updatedAt  DateTime   @updatedAt
-    published  Boolean?   @default(false)
-    author     User       @relation("authorPosts", fields: [authorId], references: [id])
-    authorId   Int
-    categories Category[] @relation("categoryPosts")
-    viewsCount Int        @default(0)
+    id             Int        @id @default(autoincrement())
+    title          String     @unique
+    seoTitle       String     @unique
+    description    String
+    seoDescription String
+    content        String
+    language       Language   @default(UK)
+    slug           String     @unique
+    image          String     @default("")
+    createdAt      DateTime   @default(now())
+    updatedAt      DateTime   @updatedAt
+    published      Boolean?   @default(false)
+    author         User       @relation("authorPosts", fields: [authorId], references: [id])
+    authorId       Int
+    categories     Category[] @relation("categoryPosts")
+    viewsCount     Int        @default(0)
 
     @@map("posts")
 }
