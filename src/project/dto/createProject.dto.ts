@@ -7,5 +7,6 @@ export class CreateProjectDto {
     readonly budget: number;
     readonly address: string;
     readonly openedData: Date;
+    readonly floorArea: number;
     readonly language: Language;
 }

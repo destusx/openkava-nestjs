@@ -3,18 +3,17 @@ import {
     UploadedFile,
     UseInterceptors,
     Post,
-    HttpStatus,
     Body,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { SetImageDto } from 'src/image/dto/setImage.dto';
-import { ImageService } from 'src/image/image.service';
 import { editFileName, imageFileFilter } from 'src/utils/file-upload.utils';
+import { FileService } from './file.service';
+import { UploadImageDto } from './dto/uploadImage.dto';
 
 @Controller()
 export class FileController {
-    constructor(private readonly imageService: ImageService) {}
+    constructor(private readonly fileService: FileService) {}
     @Post('uploads')
     @UseInterceptors(
         FileInterceptor('file', {
@@ -28,27 +27,8 @@ export class FileController {
     )
     async uploadedFile(
         @UploadedFile() file: Express.Multer.File,
-        @Body() body: { ruAlt: string; ukAlt: string },
+        @Body() uploadImageDto: UploadImageDto,
     ) {
-        const { ruAlt, ukAlt } = body;
-        const setImageDto: SetImageDto = {
-            filename: file.filename,
-            ruAlt,
-            ukAlt,
-        };
-
-        const image = await this.imageService.setImage(setImageDto);
-
-        const response = {
-            originalname: file.originalname,
-            filename: file.filename,
-            imageId: image.id,
-        };
-
-        return {
-            status: HttpStatus.OK,
-            message: 'Image uploaded successfully!',
-            data: response,
-        };
+        return this.fileService.uploadedFile(file, uploadImageDto);
     }
 }

@@ -13,10 +13,11 @@ import { PostService } from './post.service';
 import { HasRoles } from 'src/auth/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { Category, Language, Role } from '@prisma/client';
+import { Language, Role } from '@prisma/client';
 import { CreatePostDto } from './dto/createPost.dto';
 import { User } from 'src/auth/decorators/user.decorator';
 import { UpdatePostDto } from './dto/updatePost.dto';
+import { SetImageDto } from 'src/image/dto/setImage.dto';
 
 @Controller('posts')
 export class PostController {
@@ -46,8 +47,13 @@ export class PostController {
     async createPost(
         @Body() createPostDto: CreatePostDto,
         @User('id') userId: number,
+        @Body() setImageDto: SetImageDto,
     ) {
-        return await this.postService.createPost(createPostDto, userId);
+        return await this.postService.createPost(
+            createPostDto,
+            userId,
+            setImageDto,
+        );
     }
 
     @HasRoles(Role.ADMIN)

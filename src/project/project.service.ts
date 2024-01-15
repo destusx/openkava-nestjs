@@ -1,12 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Language } from '@prisma/client';
+import { Language, Project } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { CreateProjectDto } from './dto/createProject.dto';
 import slugify from 'slugify';
+import { ImageService } from 'src/image/image.service';
+import { SetImageDto } from 'src/image/dto/setImage.dto';
 
 @Injectable()
 export class ProjectService {
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService,
+        private readonly imageService: ImageService,
+    ) {}
 
     async getAllProjects(query: any) {
         let take = 9;
@@ -31,6 +36,7 @@ export class ProjectService {
             skip,
             take,
             orderBy: { createdAt: 'desc' },
+            include: { image: true },
         });
         const projectsCount = await this.prisma.project.count({
             where: {
@@ -44,9 +50,20 @@ export class ProjectService {
         };
     }
 
-    async createProject(createProjectDto: CreateProjectDto, userId: number) {
-        const { title, content, image, budget, address, openedData, language } =
-            createProjectDto;
+    async createProject(
+        createProjectDto: CreateProjectDto,
+        userId: number,
+        setImageDto: SetImageDto,
+    ): Promise<Project> {
+        const {
+            title,
+            content,
+            budget,
+            address,
+            openedData,
+            language,
+            floorArea,
+        } = createProjectDto;
 
         const slug = this.getSlug(title);
 
@@ -61,7 +78,10 @@ export class ProjectService {
             );
         }
 
-        const defaultImage = '/uploads/banner-default.png';
+        const { filename } = setImageDto;
+
+        const imageResponse = await this.imageService.getImage(filename);
+        const { id: imageId } = imageResponse;
 
         const project = await this.prisma.project.create({
             data: {
@@ -69,12 +89,16 @@ export class ProjectService {
                 content,
                 slug,
                 language,
-                image: image || defaultImage,
                 authorId: userId,
                 budget,
                 address,
                 openedData,
+                floorArea,
+                image: {
+                    connect: { id: imageId },
+                },
             },
+            include: { image: true },
         });
 
         return project;
@@ -83,6 +107,7 @@ export class ProjectService {
     async getProjectBySlug(slug: string) {
         const project = await this.prisma.project.findFirst({
             where: { slug },
+            include: { image: true },
         });
 
         if (!project) {

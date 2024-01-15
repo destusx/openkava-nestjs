@@ -1,4 +1,4 @@
-import { Language } from '@prisma/client';
+import { Image, Language } from '@prisma/client';
 
 export class CreatePostDto {
     readonly title: string;

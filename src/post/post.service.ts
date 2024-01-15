@@ -3,10 +3,15 @@ import { PrismaService } from 'src/prisma.service';
 import { CreatePostDto } from './dto/createPost.dto';
 import { Language, Post } from '@prisma/client';
 import { UpdatePostDto } from './dto/updatePost.dto';
+import { ImageService } from 'src/image/image.service';
+import { SetImageDto } from 'src/image/dto/setImage.dto';
 
 @Injectable()
 export class PostService {
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService,
+        private readonly imageService: ImageService,
+    ) {}
 
     async getAllPosts(query: any) {
         let take = 9;
@@ -30,7 +35,7 @@ export class PostService {
             skip,
             take,
             orderBy: { createdAt: 'desc' },
-            include: { categories: true },
+            include: { categories: true, image: true },
         });
         const postsCount = await this.prisma.post.count({
             where: {
@@ -55,7 +60,7 @@ export class PostService {
                 },
             },
             orderBy: { createdAt: 'desc' },
-            include: { categories: true },
+            include: { categories: true, image: true },
         });
         const postsCount = await this.prisma.post.count({
             where: {
@@ -77,7 +82,7 @@ export class PostService {
     async getPostBySlug(slug: string) {
         const post = await this.prisma.post.findFirst({
             where: { slug },
-            include: { categories: true },
+            include: { categories: true, image: true },
         });
 
         if (!post) {
@@ -95,7 +100,11 @@ export class PostService {
         return post;
     }
 
-    async createPost(createPostDto: CreatePostDto, userId: number) {
+    async createPost(
+        createPostDto: CreatePostDto,
+        userId: number,
+        setImageDto: SetImageDto,
+    ): Promise<Post> {
         const {
             title,
             seoTitle,
@@ -103,7 +112,6 @@ export class PostService {
             seoDescription,
             content,
             slug,
-            image,
             categories,
             language,
         } = createPostDto;
@@ -119,7 +127,10 @@ export class PostService {
             );
         }
 
-        const defaultImage = '/uploads/banner-default.png';
+        const { filename } = setImageDto;
+
+        const imageResponse = await this.imageService.getImage(filename);
+        const { id: imageId } = imageResponse;
 
         const post = await this.prisma.post.create({
             data: {
@@ -130,10 +141,12 @@ export class PostService {
                 content,
                 slug,
                 language,
-                image: image || defaultImage,
                 authorId: userId,
                 categories: {
                     connect: categories.map(categoryId => ({ id: categoryId })),
+                },
+                image: {
+                    connect: { id: imageId },
                 },
             },
         });
@@ -162,11 +175,11 @@ export class PostService {
             );
         }
 
-        const { title, content, image } = updatePostDto;
+        const { title, content } = updatePostDto;
 
         const updatedPost = await this.prisma.post.update({
             where: { slug },
-            data: { title, content, image },
+            data: { title, content },
         });
 
         return updatedPost;

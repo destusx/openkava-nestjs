@@ -7,7 +7,7 @@ export class ImageService {
     constructor(private prisma: PrismaService) {}
 
     async setImage(setImageDto: SetImageDto) {
-        const { filename, ruAlt, ukAlt } = setImageDto;
+        const { filename, ruAlt, ukAlt, postId, projectId } = setImageDto;
 
         const image = await this.prisma.image.create({
             data: {

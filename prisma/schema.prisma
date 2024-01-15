@@ -42,7 +42,7 @@ model Post {
     content        String
     language       Language   @default(UK)
     slug           String     @unique
-    image          String     @default("")
+    image          Image?     @relation("postImage")
     createdAt      DateTime   @default(now())
     updatedAt      DateTime   @updatedAt
     published      Boolean?   @default(false)
@@ -60,10 +60,11 @@ model Project {
     content    String
     language   Language @default(UK)
     slug       String   @unique
-    image      String   @default("")
+    image      Image?   @relation("projectImage")
     budget     Int
     address    String
     openedData DateTime
+    floorArea  Int
     createdAt  DateTime @default(now())
     updatedAt  DateTime @updatedAt
     published  Boolean? @default(false)
@@ -103,6 +104,10 @@ model Image {
     ukAlt     String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    post      Post?    @relation("postImage", fields: [postId], references: [id])
+    postId    Int?     @unique
+    project   Project? @relation("projectImage", fields: [projectId], references: [id])
+    projectId Int?     @unique
 
     @@map("images")
 }
