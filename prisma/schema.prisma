@@ -87,14 +87,28 @@ model Category {
 }
 
 model Menu {
+    id            Int           @id @default(autoincrement())
+    name          String
+    slug          String
+    title         String
+    language      Language      @default(UK)
+    description   String?
+    subcategories Subcategory[]
+
+    @@map("menu")
+}
+
+model Subcategory {
     id          Int      @id @default(autoincrement())
     name        String
     slug        String
     title       String
+    menuId      Int
+    menu        Menu     @relation(fields: [menuId], references: [id])
     language    Language @default(UK)
     description String?
 
-    @@map("menu")
+    @@map("subcategory")
 }
 
 model Image {

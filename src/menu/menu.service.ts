@@ -11,6 +11,7 @@ export class MenuService {
             where: {
                 language,
             },
+            include: { subcategories: true },
         });
     }
 }
