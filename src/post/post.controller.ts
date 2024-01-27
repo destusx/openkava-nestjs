@@ -17,7 +17,6 @@ import { Language, Role } from '@prisma/client';
 import { CreatePostDto } from './dto/createPost.dto';
 import { User } from 'src/auth/decorators/user.decorator';
 import { UpdatePostDto } from './dto/updatePost.dto';
-import { SetImageDto } from 'src/image/dto/setImage.dto';
 
 @Controller('posts')
 export class PostController {
@@ -47,13 +46,8 @@ export class PostController {
     async createPost(
         @Body() createPostDto: CreatePostDto,
         @User('id') userId: number,
-        @Body() setImageDto: SetImageDto,
     ) {
-        return await this.postService.createPost(
-            createPostDto,
-            userId,
-            setImageDto,
-        );
+        return await this.postService.createPost(createPostDto, userId);
     }
 
     @HasRoles(Role.ADMIN)

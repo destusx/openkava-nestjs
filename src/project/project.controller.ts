@@ -14,7 +14,6 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Role } from '@prisma/client';
 import { User } from 'src/auth/decorators/user.decorator';
-import { SetImageDto } from 'src/image/dto/setImage.dto';
 
 @Controller('projects')
 export class ProjectController {
@@ -31,12 +30,10 @@ export class ProjectController {
     async createProject(
         @Body() createProjectDto: CreateProjectDto,
         @User('id') userId: number,
-        @Body() setImageDto: SetImageDto,
     ) {
         return await this.projectService.createProject(
             createProjectDto,
             userId,
-            setImageDto,
         );
     }
 

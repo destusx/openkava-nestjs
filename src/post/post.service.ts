@@ -3,15 +3,10 @@ import { PrismaService } from 'src/prisma.service';
 import { CreatePostDto } from './dto/createPost.dto';
 import { Language, Post } from '@prisma/client';
 import { UpdatePostDto } from './dto/updatePost.dto';
-import { ImageService } from 'src/image/image.service';
-import { SetImageDto } from 'src/image/dto/setImage.dto';
 
 @Injectable()
 export class PostService {
-    constructor(
-        private prisma: PrismaService,
-        private readonly imageService: ImageService,
-    ) {}
+    constructor(private prisma: PrismaService) {}
 
     async getAllPosts(query: any) {
         let take = 9;
@@ -103,7 +98,6 @@ export class PostService {
     async createPost(
         createPostDto: CreatePostDto,
         userId: number,
-        setImageDto: SetImageDto,
     ): Promise<Post> {
         const {
             title,
@@ -114,6 +108,7 @@ export class PostService {
             slug,
             categories,
             language,
+            image,
         } = createPostDto;
 
         const existPost = await this.prisma.post.findFirst({
@@ -126,11 +121,6 @@ export class PostService {
                 HttpStatus.UNPROCESSABLE_ENTITY,
             );
         }
-
-        const { filename } = setImageDto;
-
-        const imageResponse = await this.imageService.getImage(filename);
-        const { id: imageId } = imageResponse;
 
         const post = await this.prisma.post.create({
             data: {
@@ -146,7 +136,7 @@ export class PostService {
                     connect: categories.map(categoryId => ({ id: categoryId })),
                 },
                 image: {
-                    connect: { id: imageId },
+                    connect: { id: image },
                 },
             },
         });

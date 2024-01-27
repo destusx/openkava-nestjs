@@ -3,15 +3,10 @@ import { Language, Project } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { CreateProjectDto } from './dto/createProject.dto';
 import slugify from 'slugify';
-import { ImageService } from 'src/image/image.service';
-import { SetImageDto } from 'src/image/dto/setImage.dto';
 
 @Injectable()
 export class ProjectService {
-    constructor(
-        private prisma: PrismaService,
-        private readonly imageService: ImageService,
-    ) {}
+    constructor(private prisma: PrismaService) {}
 
     async getAllProjects(query: any) {
         let take = 9;
@@ -53,13 +48,13 @@ export class ProjectService {
     async createProject(
         createProjectDto: CreateProjectDto,
         userId: number,
-        setImageDto: SetImageDto,
     ): Promise<Project> {
         const {
             title,
             content,
             budget,
             address,
+            image,
             openedData,
             language,
             floorArea,
@@ -78,11 +73,6 @@ export class ProjectService {
             );
         }
 
-        const { filename } = setImageDto;
-
-        const imageResponse = await this.imageService.getImage(filename);
-        const { id: imageId } = imageResponse;
-
         const project = await this.prisma.project.create({
             data: {
                 title,
@@ -95,7 +85,7 @@ export class ProjectService {
                 openedData,
                 floorArea,
                 image: {
-                    connect: { id: imageId },
+                    connect: { id: image },
                 },
             },
             include: { image: true },

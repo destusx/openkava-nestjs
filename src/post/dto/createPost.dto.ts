@@ -7,7 +7,7 @@ export class CreatePostDto {
     readonly seoDescription: string;
     readonly content: string;
     readonly slug: string;
-    readonly image: string;
+    readonly image: number;
     readonly categories: number[];
     readonly language: Language;
 }
